@@ -33,7 +33,7 @@ export const VITALS = [
 ] as const
 
 export const defaultSheet = (): Sheet => ({
-  image: '', name: 'Elisa', race: 'Nokturno', klass: 'Ilusionista Materializadora / Bardo', level: 12,
+  image: '', name: '', race: '', klass: '', level: 0,
   attrs: {}, vitals: {}, damage: 0, armor: 0,
   equipment: [], spells: [], passives: [], allies: [], lore: '', chapters: [],
 })

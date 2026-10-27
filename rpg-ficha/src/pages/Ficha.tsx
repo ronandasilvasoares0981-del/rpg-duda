@@ -35,7 +35,7 @@ export default function Ficha() {
         <div className="w-full min-w-0 flex-1 space-y-2">
           <p className="text-sm text-zinc-400">📖 Ficha de Personagem</p>
           <h1 className="break-words text-4xl font-bold text-amber-400">{s.name || 'Sem nome'}</h1>
-          <p>Nível {s.level} • {s.race} • {s.klass}</p>
+          <p className="text-zinc-300">{[s.level ? `Nível ${s.level}` : '', s.race, s.klass].filter(Boolean).join(' • ') || 'Preencha as informações abaixo'}</p>
           {VITALS.map(d => {
             const v = vitalOf(s, d.k)
             return (
