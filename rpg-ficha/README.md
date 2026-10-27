@@ -2,7 +2,16 @@
 
 Site de ficha de RPG em React + Vite + Tailwind, com Supabase (login, banco e fotos) e pronto para a Vercel.
 
-Abas: **Ficha** (foto, informações, atributos e status), **Equipamentos**, **Magias**, **Passivas**, **Aliados** (fotos e anotações) e **Lore** (história e registros).
+Abas: **Ficha** (foto, informações, atributos, elementos e status), **Equipamentos**, **Magias**, **Passivas**, **Aliados** (fotos e anotações) e **Lore** (história e registros).
+
+## Backup em .json
+
+Na aba **Ficha**, o card **💾 Backup da ficha** tem dois botões:
+
+- **Exportar .json** baixa a ficha atual (`ficha-<nome>.json`).
+- **Importar .json** lê um arquivo exportado antes e **substitui** a ficha atual (pede confirmação). O arquivo é validado e limpo antes de entrar; as alterações são salvas na nuvem automaticamente.
+
+As fotos não vão dentro do arquivo: o .json guarda só os links delas no Storage.
 
 ## 1. Supabase
 
@@ -37,6 +46,7 @@ desligue **Allow new users to sign up** em **Authentication > Sign In / Provider
 
 ## Como mexer no código
 
-- Atributos e barras de status: lista `ATTRS` e `VITALS` em `src/types.ts`.
+- Atributos e barras de status: lista `ATTRS` e `VITALS` em `src/types.ts` (a Energia usa `pct: true`: é porcentagem de 0 a 100 %; para outra barra virar porcentagem, é só marcar `pct: true`).
+- Elementos prontos (botões de adição rápida): lista `ELEMENT_PRESETS` em `src/types.ts`. O usuário também cria elementos personalizados na própria tela.
 - Nova aba: crie a página em `src/pages` e adicione uma linha em `TABS` no `src/App.tsx`.
 - Visual dos cards e botões: `src/components/ui.tsx`.

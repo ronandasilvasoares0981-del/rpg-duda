@@ -1,7 +1,9 @@
 import { Minus, Plus } from 'lucide-react'
 import { useSheet } from '../store'
-import { ATTRS, Sheet, VITALS, Vital, vitalOf } from '../types'
+import { ATTRS, Sheet, VITALS, Vital, fixVital, vitalOf } from '../types'
 import { Bar, Card, Field, Num, PhotoBox, Txt, btnSm, inputBase } from '../components/ui'
+import Elementos from '../components/Elementos'
+import SheetIO from '../components/SheetIO'
 
 // Linha de uma barra de status: botões -1/+1, valor atual / máximo e a barra
 function VitalEditor({ def, v, onChange }: { def: (typeof VITALS)[number]; v: Vital; onChange: (p: Partial<Vital>) => void }) {
@@ -11,8 +13,12 @@ function VitalEditor({ def, v, onChange }: { def: (typeof VITALS)[number]; v: Vi
         <span className="mr-auto text-sm">{def.icon} {def.label}</span>
         <button aria-label={`Diminuir ${def.label}`} className={`${btnSm} ${def.btn}`} onClick={() => onChange({ cur: Math.max(0, v.cur - 1) })}><Minus size={14} /></button>
         <Num label={`${def.label} atual`} value={v.cur} onChange={n => onChange({ cur: n })} className={`${inputBase} w-20 text-center`} />
-        <span className="text-zinc-500">/</span>
-        <Num label={`${def.label} máximo`} value={v.max} onChange={n => onChange({ max: n })} className={`${inputBase} w-20 text-center`} />
+        {def.pct
+          ? <span className="text-zinc-400">%</span>
+          : <>
+              <span className="text-zinc-500">/</span>
+              <Num label={`${def.label} máximo`} value={v.max} onChange={n => onChange({ max: n })} className={`${inputBase} w-20 text-center`} />
+            </>}
         <button aria-label={`Aumentar ${def.label}`} className={`${btnSm} ${def.btn}`} onClick={() => onChange({ cur: v.cur + 1 })}><Plus size={14} /></button>
       </div>
       <Bar value={v.cur} max={v.max} color={def.bar} />
@@ -25,7 +31,7 @@ export default function Ficha() {
   const set = <K extends keyof Sheet>(k: K, v: Sheet[K]) => update(p => ({ ...p, [k]: v }) as Sheet)
   const setAttr = (k: string, n: number) => update(p => ({ ...p, attrs: { ...p.attrs, [k]: n } }))
   const setVital = (k: string, patch: Partial<Vital>) =>
-    update(p => ({ ...p, vitals: { ...p.vitals, [k]: { ...vitalOf(p, k), ...patch } } }))
+    update(p => ({ ...p, vitals: { ...p.vitals, [k]: fixVital(k, { ...vitalOf(p, k), ...patch }) } }))
 
   return (
     <div className="space-y-4">
@@ -36,11 +42,20 @@ export default function Ficha() {
           <p className="text-sm text-zinc-400">📖 Ficha de Personagem</p>
           <h1 className="break-words text-4xl font-bold text-amber-400">{s.name || 'Sem nome'}</h1>
           <p className="text-zinc-300">{[s.level ? `Nível ${s.level}` : '', s.race, s.klass].filter(Boolean).join(' • ') || 'Preencha as informações abaixo'}</p>
+          {s.elements.some(e => e.name.trim()) && (
+            <div className="flex flex-wrap gap-2">
+              {s.elements.filter(e => e.name.trim()).map(e => (
+                <span key={e.id} className="rounded-full border border-amber-400/40 bg-zinc-950 px-3 py-0.5 text-sm text-amber-300">
+                  {e.icon} {e.name}{e.level ? ` ${e.level}` : ''}
+                </span>
+              ))}
+            </div>
+          )}
           {VITALS.map(d => {
             const v = vitalOf(s, d.k)
             return (
               <div key={d.k} className="space-y-1">
-                <p className="text-sm">{d.icon} {d.label} {v.cur} / {v.max}</p>
+                <p className="text-sm">{d.icon} {d.label} {d.pct ? `${v.cur}%` : `${v.cur} / ${v.max}`}</p>
                 <Bar value={v.cur} max={v.max} color={d.bar} />
               </div>
             )
@@ -72,6 +87,8 @@ export default function Ficha() {
         </div>
       </Card>
 
+      <Elementos />
+
       <Card className="space-y-4">
         <h2 className="text-2xl font-bold text-amber-400">❤️ Status</h2>
         <div className="grid gap-5 sm:grid-cols-2">
@@ -82,6 +99,8 @@ export default function Ficha() {
           <Field label="Armadura"><Num value={s.armor} onChange={n => set('armor', n)} /></Field>
         </div>
       </Card>
+
+      <SheetIO />
     </div>
   )
 }
