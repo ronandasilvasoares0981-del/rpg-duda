@@ -1,4 +1,4 @@
-# Grimório RPG
+# RPG da Duda
 
 Site de ficha de RPG em React + Vite + Tailwind, com Supabase (login, banco e fotos) e pronto para a Vercel.
 

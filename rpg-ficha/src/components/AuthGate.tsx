@@ -30,7 +30,7 @@ export default function AuthGate({ children }: { children: ReactNode }) {
     <div className="grid min-h-screen place-items-center p-4">
       <Card className="w-full max-w-sm">
         <form className="space-y-3" onSubmit={submit}>
-          <h1 className="text-3xl font-bold text-amber-400">📖 Grimório</h1>
+          <h1 className="text-3xl font-bold text-amber-400">📖 RPG da Duda</h1>
           <input className={inputCls} type="email" autoComplete="username" aria-label="E-mail" placeholder="E-mail" value={email} onChange={e => setEmail(e.target.value)} />
           <input className={inputCls} type="password" autoComplete="current-password" aria-label="Senha" placeholder="Senha (mínimo 6 caracteres)" value={pass} onChange={e => setPass(e.target.value)} />
           {msg && <p className="text-sm text-amber-300">{msg}</p>}

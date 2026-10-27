@@ -62,7 +62,7 @@ export const newId = () => crypto.randomUUID()
 // ---------------------------------------------------------------------------
 // Import / export em .json
 // ---------------------------------------------------------------------------
-const FORMAT = 'grimorio-rpg-ficha'
+const FORMAT = 'rpg-da-duda-ficha'
 const VERSION = 1
 
 // Envelope do arquivo exportado: identifica o formato e guarda a ficha dentro de "sheet"

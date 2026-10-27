@@ -1,5 +1,5 @@
 -- =====================================================================
--- Grimório RPG — esquema para Supabase (PostgreSQL)
+-- RPG da Duda — esquema para Supabase (PostgreSQL)
 -- Como usar: Supabase > SQL Editor > New query > cole tudo > Run
 -- É seguro rodar mais de uma vez. Não mexe nas tabelas de outros projetos.
 -- Cada usuário logado só enxerga e edita a PRÓPRIA ficha (Row Level Security).
