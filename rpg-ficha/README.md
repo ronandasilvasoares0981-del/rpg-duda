@@ -4,6 +4,10 @@ Site de ficha de RPG em React + Vite + Tailwind, com Supabase (login, banco e fo
 
 Abas: **Ficha** (foto, informações, atributos, elementos e status), **Equipamentos**, **Magias**, **Passivas**, **Aliados** (fotos e anotações) e **Lore** (história e registros).
 
+## Pesquisa e filtros
+
+Em **Equipamentos**, **Magias** e **Passivas** há uma barra de pesquisa (ignora acentos e maiúsculas; todas as palavras digitadas precisam aparecer). Dá para escolher onde buscar (tudo, nome, tipo/custo/slot ou descrição), filtrar pelas tags que já existem na lista e ordenar por nome. Os filtros valem só enquanto a aba está aberta.
+
 ## Backup em .json
 
 Na aba **Ficha**, o card **💾 Backup da ficha** tem dois botões:

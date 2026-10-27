@@ -102,3 +102,31 @@ export function parseSheet(raw: unknown): Sheet {
     chapters: list(r.chapters, o => ({ id: id(o.id), title: str(o.title), text: str(o.text) })),
   })
 }
+
+// ---------------------------------------------------------------------------
+// Pesquisa e filtros das listas (Equipamentos, Magias e Passivas)
+// ---------------------------------------------------------------------------
+export type SearchField = 'all' | 'name' | 'tag' | 'description'
+export type SortMode = 'orig' | 'az' | 'za'
+export const NO_TAG = '__sem_tag__' // valor do filtro "itens sem tag"
+
+// Minúsculas e sem acentos: "Ambicao" encontra "Ambição"
+export const normText = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+
+export interface EntryFilter { q: string; field: SearchField; tag: string; sort: SortMode }
+
+// Todas as palavras digitadas precisam aparecer (em qualquer ordem) no campo escolhido
+export function filterEntries(items: Entry[], f: EntryFilter): Entry[] {
+  const terms = normText(f.q).split(/\s+/).filter(Boolean)
+  const out = items.filter(it => {
+    const t = it.tag.trim()
+    if (f.tag === NO_TAG && t) return false
+    if (f.tag && f.tag !== NO_TAG && t !== f.tag) return false
+    if (terms.length === 0) return true
+    const hay = normText(f.field === 'all' ? `${it.name}\n${it.tag}\n${it.description}` : it[f.field])
+    return terms.every(w => hay.includes(w))
+  })
+  if (f.sort === 'orig') return out
+  const dir = f.sort === 'az' ? 1 : -1
+  return [...out].sort((a, b) => dir * a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }))
+}
