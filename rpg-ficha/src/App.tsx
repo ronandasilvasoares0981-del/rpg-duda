@@ -11,7 +11,7 @@ const TABS = [
   { id: 'ficha', label: '📖 Ficha', Page: Ficha },
   { id: 'equip', label: '🛡️ Equipamentos', Page: () => (
     <EntryPage field="equipment" title="Equipamentos" icon="🛡️" tagLabel="Slot" tagHint="Ex.: mão direita, corpo"
-      newLabel="Novo equipamento" empty="Nenhum equipamento registrado ainda." /> ) },
+      newLabel="Novo equipamento" empty="Nenhum equipamento registrado ainda." withImage imageLabel="Imagem do equipamento" /> ) },
   { id: 'magias', label: '✨ Magias', Page: () => (
     <EntryPage field="spells" title="Magias" icon="✨" tagLabel="Custo" tagHint="Ex.: 20 MP"
       newLabel="Nova magia" empty="Nenhuma magia registrada ainda." /> ) },

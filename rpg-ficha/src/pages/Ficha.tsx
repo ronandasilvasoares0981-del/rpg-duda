@@ -1,6 +1,7 @@
 import { Minus, Plus } from 'lucide-react'
 import { useSheet } from '../store'
 import { ATTRS, Sheet, VITALS, Vital, vitalOf } from '../types'
+import BackupCard from '../components/BackupCard'
 import { Bar, Card, Field, Num, PhotoBox, Txt, btnSm, inputBase } from '../components/ui'
 
 // Linha de uma barra de status: botões -1/+1, valor atual / máximo e a barra
@@ -82,6 +83,8 @@ export default function Ficha() {
           <Field label="Armadura"><Num value={s.armor} onChange={n => set('armor', n)} /></Field>
         </div>
       </Card>
+
+      <BackupCard />
     </div>
   )
 }

@@ -2,7 +2,16 @@
 
 Site de ficha de RPG em React + Vite + Tailwind, com Supabase (login, banco e fotos) e pronto para a Vercel.
 
-Abas: **Ficha** (foto, informações, atributos e status), **Equipamentos**, **Magias**, **Passivas**, **Aliados** (fotos e anotações) e **Lore** (história e registros).
+Abas: **Ficha** (foto, informações, atributos, status e **exportar/importar**), **Equipamentos** (com imagem), **Magias**, **Passivas**, **Aliados** (fotos e anotações) e **Lore** (história e registros).
+
+## Exportar e importar ficha
+
+Na aba **Ficha**, no card **Exportar e importar**:
+
+- **Exportar ficha** baixa um arquivo `.json` com a ficha inteira. As fotos (personagem, equipamentos e aliados) vão dentro do arquivo, então ele funciona mesmo se as fotos originais forem apagadas.
+- **Importar ficha** lê um arquivo exportado, pede confirmação e **substitui** a ficha atual. As fotos do arquivo são reenviadas para o Storage da conta que está importando. Arquivos inválidos são recusados com uma mensagem.
+
+Cada conta tem uma única ficha, então exporte antes de importar se quiser guardar a atual.
 
 ## 1. Supabase
 
@@ -38,5 +47,7 @@ desligue **Allow new users to sign up** em **Authentication > Sign In / Provider
 ## Como mexer no código
 
 - Atributos e barras de status: lista `ATTRS` e `VITALS` em `src/types.ts`.
+- Imagem nos itens de uma lista: passe `withImage` ao `EntryPage` em `src/App.tsx` (hoje só Equipamentos usa).
+- Formato do arquivo exportado e validação da importação: `src/lib/backup.ts`.
 - Nova aba: crie a página em `src/pages` e adicione uma linha em `TABS` no `src/App.tsx`.
 - Visual dos cards e botões: `src/components/ui.tsx`.

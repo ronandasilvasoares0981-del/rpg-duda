@@ -50,13 +50,18 @@ async function shrink(file: File, side = 1200): Promise<Blob> {
   return new Promise((res, rej) => c.toBlob(b => (b ? res(b) : rej(new Error('Imagem inválida'))), 'image/jpeg', 0.87))
 }
 
-// Envia a imagem para o Storage do Supabase (pasta com o id do usuário) e devolve a URL pública
-export async function uploadImage(file: File): Promise<string> {
+// Envia um JPEG já pronto para o Storage do Supabase (pasta com o id do usuário) e devolve a URL pública
+export async function uploadBlob(blob: Blob): Promise<string> {
   const { data: { user } } = await supabase.auth.getUser()
   const path = `${user!.id}/${crypto.randomUUID()}.jpg`
-  const { error } = await supabase.storage.from(BUCKET).upload(path, await shrink(file), { contentType: 'image/jpeg', cacheControl: '31536000' })
+  const { error } = await supabase.storage.from(BUCKET).upload(path, blob, { contentType: 'image/jpeg', cacheControl: '31536000' })
   if (error) throw error
   return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl
+}
+
+// Reduz a imagem escolhida pelo usuário e envia
+export async function uploadImage(file: File): Promise<string> {
+  return uploadBlob(await shrink(file))
 }
 
 // Espaço de foto com envio, troca e remoção (personagem e aliados)
@@ -82,7 +87,7 @@ export function PhotoBox({ src, onChange, className = '', label = 'Adicionar fot
             </label>}
         {busy && <div className="absolute inset-0 grid place-items-center bg-black/70 text-amber-300">Enviando…</div>}
       </div>
-      <div className="flex gap-4 text-sm text-zinc-400">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-400">
         {src && <label htmlFor={id} className="cursor-pointer hover:text-amber-400">Trocar foto</label>}
         {src && <button className="hover:text-red-400" onClick={() => onChange('')}>Remover foto</button>}
       </div>

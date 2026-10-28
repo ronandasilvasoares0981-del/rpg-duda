@@ -1,6 +1,6 @@
 // Tudo o que a ficha guarda. Fica em uma única linha (jsonb) por usuário no Supabase.
 
-export interface Entry { id: string; name: string; tag: string; description: string } // equipamento, magia ou passiva
+export interface Entry { id: string; name: string; tag: string; description: string; image?: string } // equipamento, magia ou passiva (image é opcional: fichas antigas não têm)
 export interface Ally { id: string; name: string; relation: string; notes: string; image: string }
 export interface Chapter { id: string; title: string; text: string }
 export interface Vital { cur: number; max: number }

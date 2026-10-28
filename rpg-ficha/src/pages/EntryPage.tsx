@@ -1,16 +1,17 @@
 // Página genérica de lista: serve para Equipamentos, Magias e Passivas
 import { useSheet } from '../store'
 import { Entry, Sheet, newId } from '../types'
-import { Card, DeleteBtn, Txt, btnCls, inputCls } from '../components/ui'
+import { Card, DeleteBtn, PhotoBox, Txt, btnCls, inputCls } from '../components/ui'
 
 interface Props {
   field: 'equipment' | 'spells' | 'passives'
   title: string; icon: string
   tagLabel: string; tagHint: string
   newLabel: string; empty: string
+  withImage?: boolean; imageLabel?: string // liga o espaço de imagem em cada item
 }
 
-export default function EntryPage({ field, title, icon, tagLabel, tagHint, newLabel, empty }: Props) {
+export default function EntryPage({ field, title, icon, tagLabel, tagHint, newLabel, empty, withImage, imageLabel = 'Adicionar imagem' }: Props) {
   const { sheet, update } = useSheet()
   const items = sheet[field]
   const setItems = (fn: (l: Entry[]) => Entry[]) => update(p => ({ ...p, [field]: fn(p[field]) }) as Sheet)
@@ -20,18 +21,27 @@ export default function EntryPage({ field, title, icon, tagLabel, tagHint, newLa
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-3xl font-bold text-amber-400">{icon} {title}</h1>
-        <button className={btnCls} onClick={() => setItems(l => [{ id: newId(), name: '', tag: '', description: '' }, ...l])}>+ {newLabel}</button>
+        <button className={btnCls} onClick={() => setItems(l => [{ id: newId(), name: '', tag: '', description: '', image: '' }, ...l])}>+ {newLabel}</button>
       </div>
       {items.length === 0 && <Card><p className="text-zinc-400">{empty} Use o botão acima para registrar o primeiro.</p></Card>}
       {items.map(it => (
-        <Card key={it.id} className="space-y-3">
-          <div className="flex items-center gap-3">
-            <input aria-label="Nome" className={`${inputCls} text-lg font-bold text-amber-300`} placeholder={newLabel}
-              value={it.name} onChange={e => edit(it.id, { name: e.target.value })} />
-            <DeleteBtn what={`"${it.name || 'este item'}"`} onDelete={() => setItems(l => l.filter(x => x.id !== it.id))} />
+        <Card key={it.id}>
+          <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
+            {withImage && (
+              <div className="w-36 shrink-0">
+                <PhotoBox src={it.image ?? ''} onChange={u => edit(it.id, { image: u })} className="h-36 w-36" label={imageLabel} />
+              </div>
+            )}
+            <div className="w-full min-w-0 flex-1 space-y-3">
+              <div className="flex items-center gap-3">
+                <input aria-label="Nome" className={`${inputCls} text-lg font-bold text-amber-300`} placeholder={newLabel}
+                  value={it.name} onChange={e => edit(it.id, { name: e.target.value })} />
+                <DeleteBtn what={`"${it.name || 'este item'}"`} onDelete={() => setItems(l => l.filter(x => x.id !== it.id))} />
+              </div>
+              <Txt label={tagLabel} placeholder={tagHint} value={it.tag} onChange={v => edit(it.id, { tag: v })} />
+              <Txt label="Descrição e efeitos" area rows={4} value={it.description} onChange={v => edit(it.id, { description: v })} />
+            </div>
           </div>
-          <Txt label={tagLabel} placeholder={tagHint} value={it.tag} onChange={v => edit(it.id, { tag: v })} />
-          <Txt label="Descrição e efeitos" area rows={4} value={it.description} onChange={v => edit(it.id, { description: v })} />
         </Card>
       ))}
     </div>
