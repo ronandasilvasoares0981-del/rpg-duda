@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { ImagePlus, Trash2 } from 'lucide-react'
 import { useCharacter } from '../context/CharacterContext'
-import { Accessory } from '../types/accessory'
-import { Field, Modal, uploadImage, Txt } from './ui'
+import { Accessory, EQUIPMENT_TYPES } from '../types/accessory'
+import { Field, inputCls, Modal, uploadImage, Txt } from './ui'
 
 const MAX_MB = 5
 
@@ -29,15 +29,18 @@ export default function AccessoryModal({ initial, onClose }: { initial: Accessor
   }
 
   return (
-    <Modal title={initial.name ? 'Editar acessório' : 'Novo acessório'} onClose={onClose} onSave={submit}>
+    <Modal title={initial.name ? 'Editar equipamento' : 'Novo equipamento'} onClose={onClose} onSave={submit}>
       <Txt label="Nome" value={f.name} onChange={v => set('name', v)} />
-      <Txt label="Tipo" value={f.type} onChange={v => set('type', v)} />
+      <Field label="Tipo (armadura, arma, escudo...)">
+        <input list="tipos-equip" className={inputCls} value={f.type} onChange={e => set('type', e.target.value)} />
+        <datalist id="tipos-equip">{EQUIPMENT_TYPES.map(t => <option key={t} value={t} />)}</datalist>
+      </Field>
       <Txt label="Descrição" value={f.description} onChange={v => set('description', v)} area />
       <Txt label="Bônus" value={f.bonus} onChange={v => set('bonus', v)} />
       <Txt label="Resistências (uma por linha, ex.: Frio +50%)" value={f.resistances} onChange={v => set('resistances', v)} area />
 
       <div className="space-y-2">
-        <p className="text-sm text-zinc-400">Imagem do equipamento</p>
+        <p className="text-sm text-zinc-400">Foto do equipamento (armadura, arma etc.)</p>
         {f.image && (
           <div className="relative">
             <img src={f.image} alt="Pré-visualização" className="h-40 w-full rounded-xl border border-purple-500/30 bg-zinc-950 object-contain" />

@@ -1,5 +1,5 @@
 import { useCharacter } from '../context/CharacterContext'
-import { Accessory } from '../types/accessory'
+import { Accessory, equipmentIcon } from '../types/accessory'
 import { Actions, Card } from './ui'
 
 export default function AccessoryCard({ a, onEdit }: { a: Accessory; onEdit: () => void }) {
@@ -11,7 +11,7 @@ export default function AccessoryCard({ a, onEdit }: { a: Accessory; onEdit: () 
       {/* object-contain mostra o equipamento inteiro, sem cortar */}
       {a.image && <img src={a.image} alt={a.name} className="mb-3 h-40 w-full rounded-xl bg-zinc-950 object-contain" />}
       <div className="flex items-start justify-between gap-2">
-        <h3 className="text-xl font-bold text-amber-400">🧥 {a.name}</h3>
+        <h3 className="text-xl font-bold text-amber-400">{equipmentIcon(a.type)} {a.name}</h3>
         <Actions onEdit={onEdit} onDelete={() => remove('accessories', a.id)} />
       </div>
       <p className="text-xs text-purple-300">Tipo: {a.type}</p>

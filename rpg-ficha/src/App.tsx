@@ -12,7 +12,7 @@ const TABS = [
   { id: 'status', label: '📊 Status', Page: Status },
   { id: 'magias', label: '✨ Magias', Page: Magias },
   { id: 'passivas', label: '🩶 Passivas', Page: Passivas },
-  { id: 'acessorios', label: '🧥 Acessórios', Page: Acessorios },
+  { id: 'acessorios', label: '⚔️ Equipamentos', Page: Acessorios },
   { id: 'config', label: '⚙️ Configurações', Page: Config },
 ]
 
