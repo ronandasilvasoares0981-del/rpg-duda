@@ -23,7 +23,7 @@ export default function Status() {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {Object.entries(c.resources).map(([k, v]) => <StatusCard key={k} name={k} value={v} onChange={n => setResource(k, n)} />)}
           <StatusCard name="Vida" value={c.hp} onChange={n => setCharacter({ hp: n })} />
-          <StatusCard name="Sanidade" value={c.san} onChange={n => setCharacter({ san: n })} />
+          <StatusCard name="🧠 Sanidade" value={c.san} max={c.sanMax} barColor="bg-blue-500" onChange={n => setCharacter({ san: Math.max(0, Math.min(c.sanMax, n)) })} />
         </div>
       </section>
     </div>
