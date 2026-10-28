@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { ArrowLeft } from 'lucide-react'
 import { supabase } from './lib/supabase'
 import { Status, useSheet } from './store'
 import Ficha from './pages/Ficha'
@@ -27,10 +28,11 @@ const STATUS_TEXT: Record<Status, string> = {
   loading: 'Carregando…', saved: 'Salvo na nuvem', dirty: 'Alterações pendentes…', saving: 'Salvando…', error: 'Erro ao salvar',
 }
 
-export default function App() {
+// onBack (só no modo mestre) mostra o botão de voltar ao painel; doPlayer = o mestre está na ficha de outra pessoa
+export default function App({ onBack, doPlayer }: { onBack?: () => void; doPlayer?: boolean }) {
   const [tab, setTab] = useState('ficha')
   const [target, setTarget] = useState<string | undefined>() // item achado na busca, para rolar até ele
-  const { status, error, loaded } = useSheet()
+  const { sheet, status, error, loaded } = useSheet()
   const { Page } = TABS.find(t => t.id === tab)!
 
   // Depois de trocar de aba pela busca, rola até o item e o destaca
@@ -60,9 +62,20 @@ export default function App() {
     <div className="flex min-h-screen flex-col">
       {/* Topo: nome do site e barra de pesquisa */}
       <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-purple-500/30 bg-zinc-950/95 px-3 backdrop-blur sm:gap-4 sm:px-4">
+        {onBack && (
+          <button onClick={onBack} aria-label="Voltar ao painel do mestre"
+            className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-purple-500/40 px-3 py-2 text-sm text-zinc-200 transition hover:bg-zinc-900">
+            <ArrowLeft size={16} /><span className="hidden sm:inline">Voltar</span>
+          </button>
+        )}
         <span className="shrink-0 whitespace-nowrap text-lg font-bold tracking-wide text-amber-400 sm:text-xl">📖 RPG DUDA</span>
         <SearchBar onGo={goTo} />
       </header>
+      {doPlayer && (
+        <p className="border-b border-amber-400/40 bg-amber-400/10 px-4 py-2 text-center text-sm text-amber-300" role="status">
+          👑 Modo mestre: você está na ficha de <b>{sheet.name || 'player sem nome'}</b>. As alterações são salvas na ficha dele.
+        </p>
+      )}
       <div className="flex flex-1 flex-col md:flex-row">
       {/* Menu lateral (vira barra horizontal no celular) */}
       <nav className="flex shrink-0 items-center gap-1 overflow-x-auto overscroll-x-contain border-b border-purple-500/30 bg-zinc-950 p-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:sticky md:top-16 md:h-[calc(100vh-4rem)] md:w-56 md:flex-col md:items-stretch md:overflow-y-auto md:border-b-0 md:border-r md:p-4 lg:w-64">

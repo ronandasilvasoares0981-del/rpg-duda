@@ -45,3 +45,52 @@ drop policy if exists "rpg fotos: apagar na propria pasta" on storage.objects;
 create policy "rpg fotos: apagar na propria pasta" on storage.objects
   for delete to authenticated
   using (bucket_id = 'rpg-fotos' and (storage.foldername(name))[1] = (select auth.uid())::text);
+
+
+-- =====================================================================
+-- MODO MESTRE — rode este bloco também (é seguro rodar mais de uma vez)
+-- O mestre vê e edita TODAS as fichas; cada player continua vendo só a própria.
+-- =====================================================================
+
+-- 4) Lista de mestres. Só dá para inserir aqui pelo SQL Editor (o site não consegue se promover a mestre).
+create table if not exists public.rpg_mestres (
+  user_id uuid primary key references auth.users(id) on delete cascade
+);
+alter table public.rpg_mestres enable row level security;
+
+drop policy if exists "mestre ve a propria marca" on public.rpg_mestres;
+create policy "mestre ve a propria marca" on public.rpg_mestres
+  for select to authenticated
+  using (user_id = (select auth.uid()));
+
+grant select on public.rpg_mestres to authenticated;
+
+-- Função usada pelas políticas (security definer evita loop de segurança na própria tabela)
+create or replace function public.rpg_is_mestre()
+returns boolean
+language sql stable security definer
+set search_path = public
+as $$ select exists (select 1 from public.rpg_mestres where user_id = auth.uid()) $$;
+
+revoke all on function public.rpg_is_mestre() from public;
+grant execute on function public.rpg_is_mestre() to authenticated;
+
+-- 5) E-mail do dono na ficha, para o mestre identificar cada player na lista
+alter table public.rpg_fichas add column if not exists email text;
+
+-- 6) O mestre lê e edita qualquer ficha (somam-se à política "dono gerencia sua ficha rpg")
+drop policy if exists "mestre le todas as fichas" on public.rpg_fichas;
+create policy "mestre le todas as fichas" on public.rpg_fichas
+  for select to authenticated
+  using ((select public.rpg_is_mestre()));
+
+drop policy if exists "mestre edita todas as fichas" on public.rpg_fichas;
+create policy "mestre edita todas as fichas" on public.rpg_fichas
+  for update to authenticated
+  using ((select public.rpg_is_mestre()))
+  with check ((select public.rpg_is_mestre()));
+
+-- 7) Tornar alguém mestre (a conta precisa já ter sido criada no site; para mais mestres, some o e-mail na lista):
+insert into public.rpg_mestres (user_id)
+select id from auth.users where email in ('ronandasilva0983@gmail.com', 'duda2007udi@gmail.com')
+on conflict do nothing;
