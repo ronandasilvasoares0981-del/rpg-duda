@@ -6,11 +6,11 @@ import { BUCKET, supabase } from '../lib/supabase'
 export const inputBase = 'rounded-lg border border-purple-500/30 bg-zinc-950 px-3 py-2 text-zinc-100 outline-none transition focus:border-amber-400'
 export const inputCls = `w-full ${inputBase}`
 export const btnCls = 'inline-flex items-center gap-2 rounded-lg bg-purple-700 px-4 py-2 text-white transition hover:bg-purple-600'
-export const btnSm = 'grid h-9 w-9 shrink-0 place-items-center rounded-lg text-white transition'
+export const btnSm = 'grid h-10 w-10 shrink-0 place-items-center rounded-lg text-white transition sm:h-9 sm:w-9'
 
 // Card padrão: cinza escuro, borda roxa suave, cantos arredondados
-export const Card = ({ children, className = '' }: { children: ReactNode; className?: string }) => (
-  <div className={`fade rounded-2xl border border-purple-500/30 bg-zinc-900 p-4 ${className}`}>{children}</div>
+export const Card = ({ children, className = '', id }: { children: ReactNode; className?: string; id?: string }) => (
+  <div id={id} className={`fade rounded-2xl border border-purple-500/30 bg-zinc-900 p-4 ${className}`}>{children}</div>
 )
 
 // Barra de progresso (HP vermelha, mana azul...)
@@ -99,6 +99,6 @@ export function PhotoBox({ src, onChange, className = '', label = 'Adicionar fot
 
 // Botão de excluir usado nos cards (pede confirmação)
 export const DeleteBtn = ({ onDelete, what = 'este item' }: { onDelete: () => void; what?: string }) => (
-  <button aria-label="Excluir" className="p-1 text-zinc-400 transition hover:text-red-400"
+  <button aria-label="Excluir" className="shrink-0 p-2 text-zinc-400 transition hover:text-red-400"
     onClick={() => confirm(`Excluir ${what}?`) && onDelete()}><Trash2 size={18} /></button>
 )

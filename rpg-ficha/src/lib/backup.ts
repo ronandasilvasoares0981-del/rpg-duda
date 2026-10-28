@@ -27,6 +27,8 @@ export function normalizeSheet(raw: unknown): Sheet {
     attrs: Object.fromEntries(Object.entries(rec(r.attrs)).map(([k, v]) => [k, num(v)])),
     vitals: Object.fromEntries(Object.entries(rec(r.vitals)).map(([k, v]) => [k, { cur: num(rec(v).cur), max: num(rec(v).max) }])),
     damage: num(r.damage), armor: num(r.armor),
+    elements: list(r.elements).map(e => ({ id: newId(), name: str(e.name) })),
+    customAttrs: list(r.customAttrs).map(a => ({ id: newId(), label: str(a.label), value: num(a.value) })),
     equipment: entries(r.equipment), spells: entries(r.spells), passives: entries(r.passives),
     allies: list(r.allies).map(a => ({ id: newId(), name: str(a.name), relation: str(a.relation), notes: str(a.notes), image: img(a.image) })),
     lore: str(r.lore),
@@ -43,7 +45,7 @@ export function parseBackup(text: string): Sheet {
   const src = 'sheet' in root ? root.sheet : data // aceita também um objeto de ficha "puro"
   const s = rec(src)
   const known = ['name', 'attrs', 'vitals', 'equipment', 'spells', 'passives', 'allies', 'lore', 'chapters']
-  if (!known.some(k => k in s)) throw new Error('Este arquivo não parece ser uma ficha do Grimório.')
+  if (!known.some(k => k in s)) throw new Error('Este arquivo não parece ser uma ficha do RPG DUDA.')
   return normalizeSheet(src)
 }
 

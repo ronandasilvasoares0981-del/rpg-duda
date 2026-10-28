@@ -1,8 +1,12 @@
-# Grimório RPG
+# RPG DUDA
 
 Site de ficha de RPG em React + Vite + Tailwind, com Supabase (login, banco e fotos) e pronto para a Vercel.
 
 Abas: **Ficha** (foto, informações, atributos, status e **exportar/importar**), **Equipamentos** (com imagem), **Magias**, **Passivas**, **Aliados** (fotos e anotações) e **Lore** (história e registros).
+
+**Pesquisa:** a barra no topo procura em toda a ficha (informações, elementos, atributos, equipamentos, magias, passivas, aliados e lore), ignorando acentos. Clicar num resultado abre a aba e rola até o item.
+
+**Adicionar elementos:** na aba Ficha, o card **Elementos** adiciona/remove elementos (Fogo, Luz...) e o botão **+ Atributo** cria atributos personalizados, além dos padrões. Fichas antigas continuam funcionando.
 
 ## Exportar e importar ficha
 
@@ -46,6 +50,7 @@ desligue **Allow new users to sign up** em **Authentication > Sign In / Provider
 
 ## Como mexer no código
 
+- Busca: `src/components/SearchBar.tsx` (função `search`).
 - Atributos e barras de status: lista `ATTRS` e `VITALS` em `src/types.ts`.
 - Imagem nos itens de uma lista: passe `withImage` ao `EntryPage` em `src/App.tsx` (hoje só Equipamentos usa).
 - Formato do arquivo exportado e validação da importação: `src/lib/backup.ts`.

@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
 import { Status, useSheet } from './store'
 import Ficha from './pages/Ficha'
 import EntryPage from './pages/EntryPage'
 import Aliados from './pages/Aliados'
 import Lore from './pages/Lore'
+import SearchBar, { Hit } from './components/SearchBar'
 
 // Para criar uma nova aba: crie a página em src/pages e adicione uma linha aqui
 const TABS = [
@@ -28,8 +29,22 @@ const STATUS_TEXT: Record<Status, string> = {
 
 export default function App() {
   const [tab, setTab] = useState('ficha')
+  const [target, setTarget] = useState<string | undefined>() // item achado na busca, para rolar até ele
   const { status, error, loaded } = useSheet()
   const { Page } = TABS.find(t => t.id === tab)!
+
+  // Depois de trocar de aba pela busca, rola até o item e o destaca
+  useEffect(() => {
+    if (!target) return
+    const t = setTimeout(() => {
+      const el = document.getElementById(target)
+      if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); el.classList.add('found'); setTimeout(() => el.classList.remove('found'), 1700) }
+      else window.scrollTo({ top: 0, behavior: 'smooth' })
+      setTarget(undefined)
+    }, 60)
+    return () => clearTimeout(t)
+  }, [target, tab])
+  const goTo = (h: Hit) => { setTab(h.tab); setTarget(h.target) }
 
   // Se a ficha não carregou (ex.: o SQL ainda não foi executado), não deixa editar para não perder dados
   if (status === 'loading') return <p className="p-8 text-zinc-400">Carregando ficha…</p>
@@ -42,12 +57,18 @@ export default function App() {
   )
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
+    <div className="flex min-h-screen flex-col">
+      {/* Topo: nome do site e barra de pesquisa */}
+      <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-purple-500/30 bg-zinc-950/95 px-3 backdrop-blur sm:gap-4 sm:px-4">
+        <span className="shrink-0 whitespace-nowrap text-lg font-bold tracking-wide text-amber-400 sm:text-xl">📖 RPG DUDA</span>
+        <SearchBar onGo={goTo} />
+      </header>
+      <div className="flex flex-1 flex-col md:flex-row">
       {/* Menu lateral (vira barra horizontal no celular) */}
-      <nav className="flex items-center gap-1 overflow-x-auto border-b border-purple-500/30 bg-zinc-950 p-2 md:w-56 md:flex-col md:items-stretch md:border-b-0 md:border-r md:p-4">
+      <nav className="flex shrink-0 items-center gap-1 overflow-x-auto overscroll-x-contain border-b border-purple-500/30 bg-zinc-950 p-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:sticky md:top-16 md:h-[calc(100vh-4rem)] md:w-56 md:flex-col md:items-stretch md:overflow-y-auto md:border-b-0 md:border-r md:p-4 lg:w-64">
         {TABS.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
-            className={`whitespace-nowrap rounded-xl px-4 py-2 text-left transition ${tab === t.id ? 'bg-purple-700 text-amber-300' : 'text-zinc-400 hover:bg-zinc-900'}`}>
+            className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-left transition ${tab === t.id ? 'bg-purple-700 text-amber-300' : 'text-zinc-400 hover:bg-zinc-900'}`}>
             {t.label}
           </button>
         ))}
@@ -57,7 +78,8 @@ export default function App() {
           <button className="text-zinc-400 hover:text-amber-400" onClick={() => supabase.auth.signOut()}>Sair</button>
         </div>
       </nav>
-      <main className="mx-auto w-full max-w-4xl flex-1 p-4 md:p-8"><Page /></main>
+      <main className="mx-auto w-full min-w-0 max-w-4xl flex-1 p-3 sm:p-4 md:p-8 xl:max-w-5xl"><Page /></main>
+      </div>
     </div>
   )
 }

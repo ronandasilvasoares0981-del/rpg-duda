@@ -12,13 +12,13 @@ export default function Lore() {
   return (
     <div className="space-y-4">
       <Card className="space-y-3">
-        <h1 className="text-3xl font-bold text-amber-400">📜 Lore</h1>
+        <h1 className="text-2xl font-bold text-amber-400 sm:text-3xl">📜 Lore</h1>
         <Txt label={`História de ${sheet.name || 'seu personagem'}`} area rows={14}
           placeholder="Origem, infância, o que mudou o rumo da história, segredos, objetivos…"
           value={sheet.lore} onChange={v => update(p => ({ ...p, lore: v }))} />
       </Card>
 
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-2xl font-bold text-amber-400">📖 Registros</h2>
         <button className={btnCls} onClick={() => setChapters(l => [{ id: newId(), title: '', text: '' }, ...l])}>+ Novo registro</button>
       </div>
@@ -26,7 +26,7 @@ export default function Lore() {
         <Card><p className="text-zinc-400">Nenhum registro ainda. Use para capítulos, eventos marcantes, lembranças e segredos do personagem.</p></Card>
       )}
       {chapters.map(c => (
-        <Card key={c.id} className="space-y-3">
+        <Card key={c.id} id={`item-${c.id}`} className="space-y-3">
           <div className="flex items-center gap-3">
             <input aria-label="Título do registro" className={`${inputCls} text-lg font-bold text-amber-300`} placeholder="Título do registro"
               value={c.title} onChange={e => edit(c.id, { title: e.target.value })} />

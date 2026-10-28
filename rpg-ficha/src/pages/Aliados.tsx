@@ -11,8 +11,8 @@ export default function Aliados() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-3xl font-bold text-amber-400">🤝 Aliados</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold text-amber-400 sm:text-3xl">🤝 Aliados</h1>
         <button className={btnCls} onClick={() => setAllies(l => [{ id: newId(), name: '', relation: '', notes: '', image: '' }, ...l])}>+ Novo aliado</button>
       </div>
       {allies.length === 0 && (
@@ -20,7 +20,7 @@ export default function Aliados() {
       )}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {allies.map(a => (
-          <Card key={a.id} className="space-y-3">
+          <Card key={a.id} id={`item-${a.id}`} className="space-y-3">
             <PhotoBox src={a.image} onChange={u => edit(a.id, { image: u })} className="aspect-[4/5] w-full" label="Foto do aliado" />
             <div className="flex items-center gap-2">
               <input aria-label="Nome do aliado" className={`${inputCls} text-lg font-bold text-amber-300`} placeholder="Nome"

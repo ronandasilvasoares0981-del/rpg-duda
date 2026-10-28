@@ -3,6 +3,8 @@
 export interface Entry { id: string; name: string; tag: string; description: string; image?: string } // equipamento, magia ou passiva (image é opcional: fichas antigas não têm)
 export interface Ally { id: string; name: string; relation: string; notes: string; image: string }
 export interface Chapter { id: string; title: string; text: string }
+export interface Element { id: string; name: string }        // elemento do personagem (Fogo, Luz...)
+export interface CustomAttr { id: string; label: string; value: number } // atributo criado pelo usuário
 export interface Vital { cur: number; max: number }
 
 export interface Sheet {
@@ -11,6 +13,7 @@ export interface Sheet {
   attrs: Record<string, number>        // Força, Defesa...
   vitals: Record<string, Vital>        // hp, mp, stamina, energy
   damage: number; armor: number
+  elements: Element[]; customAttrs: CustomAttr[]
   equipment: Entry[]; spells: Entry[]; passives: Entry[]
   allies: Ally[]
   lore: string; chapters: Chapter[]
@@ -34,7 +37,7 @@ export const VITALS = [
 
 export const defaultSheet = (): Sheet => ({
   image: '', name: '', race: '', klass: '', level: 0,
-  attrs: {}, vitals: {}, damage: 0, armor: 0,
+  attrs: {}, vitals: {}, damage: 0, armor: 0, elements: [], customAttrs: [],
   equipment: [], spells: [], passives: [], allies: [], lore: '', chapters: [],
 })
 

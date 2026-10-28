@@ -19,13 +19,13 @@ export default function EntryPage({ field, title, icon, tagLabel, tagHint, newLa
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-3xl font-bold text-amber-400">{icon} {title}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold text-amber-400 sm:text-3xl">{icon} {title}</h1>
         <button className={btnCls} onClick={() => setItems(l => [{ id: newId(), name: '', tag: '', description: '', image: '' }, ...l])}>+ {newLabel}</button>
       </div>
       {items.length === 0 && <Card><p className="text-zinc-400">{empty} Use o botão acima para registrar o primeiro.</p></Card>}
       {items.map(it => (
-        <Card key={it.id}>
+        <Card key={it.id} id={`item-${it.id}`}>
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
             {withImage && (
               <div className="w-36 shrink-0">
