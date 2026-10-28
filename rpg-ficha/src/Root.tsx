@@ -36,7 +36,7 @@ export default function Root() {
     case 'painel': return <Painel onOwn={() => setView({ k: 'own' })} onPlayers={() => setView({ k: 'players' })} />
     case 'players': return <ListaPlayers myId={me.id} onBack={painel} onOpen={id => setView({ k: 'player', id })} />
     case 'own': return <SheetProvider key={me.id} userId={me.id}><App onBack={painel} /></SheetProvider>
-    // Da ficha de um player, voltar leva à lista de players; de lá se volta ao painel
-    case 'player': return <SheetProvider key={view.id} userId={view.id}><App doPlayer onBack={() => setView({ k: 'players' })} /></SheetProvider>
+    // Da ficha aberta pela lista (de um player ou a própria), voltar leva à lista; de lá se volta ao painel
+    case 'player': return <SheetProvider key={view.id} userId={view.id}><App doPlayer={view.id !== me.id} onBack={() => setView({ k: 'players' })} /></SheetProvider>
   }
 }

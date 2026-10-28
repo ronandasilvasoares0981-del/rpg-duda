@@ -43,14 +43,14 @@ export function Painel({ onOwn, onPlayers }: { onOwn: () => void; onPlayers: () 
 
 interface Row { user_id: string; email: string | null; updated_at: string; data: Partial<Sheet> | null }
 
-// Lista com todas as fichas (menos a do próprio mestre), com busca por nome, raça, classe ou e-mail
+// Lista com todas as fichas (a do próprio mestre também, marcada com "Você"), com busca por nome, raça, classe ou e-mail
 export function ListaPlayers({ myId, onBack, onOpen }: { myId: string; onBack: () => void; onOpen: (id: string) => void }) {
   const [rows, setRows] = useState<Row[] | null>(null)
   const [err, setErr] = useState('')
   const [q, setQ] = useState('')
 
   useEffect(() => {
-    supabase.from('rpg_fichas').select('user_id, email, updated_at, data').neq('user_id', myId).order('updated_at', { ascending: false })
+    supabase.from('rpg_fichas').select('user_id, email, updated_at, data').order('updated_at', { ascending: false })
       .then(({ data, error }) => { if (error) setErr(error.message); else setRows((data ?? []) as Row[]) })
   }, [myId])
 
@@ -58,8 +58,9 @@ export function ListaPlayers({ myId, onBack, onOpen }: { myId: string; onBack: (
   const shown = useMemo(() => {
     const k = norm(q.trim())
     return (rows ?? []).map(r => ({ ...r, s: mergeSheet(r.data ?? {}) }))
+      .sort((a, b) => Number(b.user_id === myId) - Number(a.user_id === myId)) // a do mestre primeiro
       .filter(r => !k || norm([r.s.player, r.s.name, r.s.race, r.s.klass, r.email ?? ''].join(' ')).includes(k))
-  }, [rows, q])
+  }, [rows, q, myId])
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -82,7 +83,7 @@ export function ListaPlayers({ myId, onBack, onOpen }: { myId: string; onBack: (
           <p className="mt-1 text-sm text-zinc-400">Confira se o bloco “MODO MESTRE” do <code>supabase.sql</code> foi executado.</p></Card>}
         {!err && rows === null && <p className="text-zinc-400">Carregando fichas…</p>}
         {rows && shown.length === 0 && (
-          <Card><p className="text-zinc-400">{rows.length === 0 ? 'Nenhum player criou uma ficha ainda.' : 'Nenhuma ficha encontrada para essa pesquisa.'}</p></Card>
+          <Card><p className="text-zinc-400">{rows.length === 0 ? 'Nenhuma ficha criada ainda.' : 'Nenhuma ficha encontrada para essa pesquisa.'}</p></Card>
         )}
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -93,7 +94,7 @@ export function ListaPlayers({ myId, onBack, onOpen }: { myId: string; onBack: (
                 {/^(https?:|data:image)/.test(s.image) && <img src={s.image} alt="" className="h-full w-full object-cover" />}
               </div>
               <div className="min-w-0">
-                <p className="truncate text-lg font-bold text-amber-300">{s.name || 'Sem nome'}</p>
+                <p className="flex items-center gap-2"><span className="truncate text-lg font-bold text-amber-300">{s.name || 'Sem nome'}</span>{user_id === myId && <span className="shrink-0 rounded bg-amber-400/15 px-1.5 text-xs text-amber-300">Você</span>}</p>
                 <p className="truncate text-sm text-zinc-300">{[s.level ? `Nível ${s.level}` : '', s.race, s.klass].filter(Boolean).join(' • ') || 'Ficha em branco'}</p>
                 <p className="truncate text-sm text-zinc-400">Player: {s.player || '—'}</p>
                 {email && <p className="truncate text-xs text-zinc-500">{email}</p>}
