@@ -41,16 +41,16 @@ export function Painel({ onOwn, onPlayers }: { onOwn: () => void; onPlayers: () 
   )
 }
 
-interface Row { user_id: string; email: string | null; updated_at: string; data: Partial<Sheet> | null }
+interface Row { user_id: string; updated_at: string; data: Partial<Sheet> | null }
 
-// Lista com todas as fichas (a do próprio mestre também, marcada com "Você"), com busca por nome, raça, classe ou e-mail
+// Lista com todas as fichas (a do próprio mestre também, marcada com "Você"), com busca por player, personagem, raça ou classe (e-mails não são carregados nem exibidos)
 export function ListaPlayers({ myId, onBack, onOpen }: { myId: string; onBack: () => void; onOpen: (id: string) => void }) {
   const [rows, setRows] = useState<Row[] | null>(null)
   const [err, setErr] = useState('')
   const [q, setQ] = useState('')
 
   useEffect(() => {
-    supabase.from('rpg_fichas').select('user_id, email, updated_at, data').order('updated_at', { ascending: false })
+    supabase.from('rpg_fichas').select('user_id, updated_at, data').order('updated_at', { ascending: false })
       .then(({ data, error }) => { if (error) setErr(error.message); else setRows((data ?? []) as Row[]) })
   }, [myId])
 
@@ -59,7 +59,7 @@ export function ListaPlayers({ myId, onBack, onOpen }: { myId: string; onBack: (
     const k = norm(q.trim())
     return (rows ?? []).map(r => ({ ...r, s: mergeSheet(r.data ?? {}) }))
       .sort((a, b) => Number(b.user_id === myId) - Number(a.user_id === myId)) // a do mestre primeiro
-      .filter(r => !k || norm([r.s.player, r.s.name, r.s.race, r.s.klass, r.email ?? ''].join(' ')).includes(k))
+      .filter(r => !k || norm([r.s.player, r.s.name, r.s.race, r.s.klass].join(' ')).includes(k))
   }, [rows, q, myId])
 
   return (
@@ -87,7 +87,7 @@ export function ListaPlayers({ myId, onBack, onOpen }: { myId: string; onBack: (
         )}
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {shown.map(({ user_id, email, updated_at, s }) => (
+          {shown.map(({ user_id, updated_at, s }) => (
             <button key={user_id} onClick={() => onOpen(user_id)}
               className="fade flex items-center gap-4 rounded-2xl border border-purple-500/30 bg-zinc-900 p-4 text-left transition hover:border-amber-400 hover:bg-zinc-800">
               <div className="h-20 w-16 shrink-0 overflow-hidden rounded-xl border border-amber-400/40 bg-zinc-800">
@@ -97,7 +97,6 @@ export function ListaPlayers({ myId, onBack, onOpen }: { myId: string; onBack: (
                 <p className="flex items-center gap-2"><span className="truncate text-lg font-bold text-amber-300">{s.name || 'Sem nome'}</span>{user_id === myId && <span className="shrink-0 rounded bg-amber-400/15 px-1.5 text-xs text-amber-300">Você</span>}</p>
                 <p className="truncate text-sm text-zinc-300">{[s.level ? `Nível ${s.level}` : '', s.race, s.klass].filter(Boolean).join(' • ') || 'Ficha em branco'}</p>
                 <p className="truncate text-sm text-zinc-400">Player: {s.player || '—'}</p>
-                {email && <p className="truncate text-xs text-zinc-500">{email}</p>}
                 <p className="text-xs text-zinc-500">Atualizada em {new Date(updated_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</p>
               </div>
             </button>

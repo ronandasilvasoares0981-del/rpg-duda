@@ -37,13 +37,13 @@ export function SheetProvider({ userId, children }: { userId: string; children: 
     setSheet(fn)
   }, [])
 
-  // Grava a ficha no banco. Ficha própria: cria ou atualiza (e guarda o e-mail).
+  // Grava a ficha no banco. Ficha própria: cria ou atualiza.
   // Ficha de outro player (mestre): só atualiza a linha que já existe.
   const persist = useCallback(async (s: Sheet) => {
     const { data: { user } } = await supabase.auth.getUser()
     const now = new Date().toISOString()
     return user!.id === userId
-      ? await supabase.from('rpg_fichas').upsert({ user_id: userId, data: s, email: user!.email, updated_at: now })
+      ? await supabase.from('rpg_fichas').upsert({ user_id: userId, data: s, updated_at: now })
       : await supabase.from('rpg_fichas').update({ data: s, updated_at: now }).eq('user_id', userId)
   }, [userId])
 

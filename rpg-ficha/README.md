@@ -15,7 +15,7 @@ Abas: **Ficha** (foto, informações, atributos, status e **exportar/importar**)
 Rode o bloco **MODO MESTRE** do `supabase.sql` (já deixa `ronandasilva0983@gmail.com` e `duda2007udi@gmail.com` como mestres; a conta precisa existir antes, então crie-a no site e rode o bloco depois, ou rode só o último `insert`). Quem é mestre vê, ao entrar, o **Painel do Mestre**:
 
 - **Minha ficha**: abre a ficha do mestre; o botão **Voltar** retorna ao painel.
-- **Fichas dos players**: lista todas as fichas (com pesquisa por nome, raça, classe ou e-mail). Abrir uma permite **ver e editar**; **Voltar** leva à lista.
+- **Fichas dos players**: lista todas as fichas (com pesquisa por player, personagem, raça ou classe; e-mails não aparecem). Abrir uma permite **ver e editar**; **Voltar** leva à lista.
 
 Para adicionar outro mestre: `insert into public.rpg_mestres (user_id) select id from auth.users where email = 'email@exemplo.com';`. Players comuns continuam indo direto à própria ficha e só enxergam a própria (garantido pelo Row Level Security).
 

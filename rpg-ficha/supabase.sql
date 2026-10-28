@@ -75,8 +75,9 @@ as $$ select exists (select 1 from public.rpg_mestres where user_id = auth.uid()
 revoke all on function public.rpg_is_mestre() from public;
 grant execute on function public.rpg_is_mestre() to authenticated;
 
--- 5) E-mail do dono na ficha, para o mestre identificar cada player na lista
-alter table public.rpg_fichas add column if not exists email text;
+-- 5) (sem uso) O site não guarda nem mostra e-mails nas fichas.
+--    Se você já rodou uma versão anterior que criou a coluna "email", pode remover os e-mails guardados com:
+-- alter table public.rpg_fichas drop column if exists email;
 
 -- 6) O mestre lê e edita qualquer ficha (somam-se à política "dono gerencia sua ficha rpg")
 drop policy if exists "mestre le todas as fichas" on public.rpg_fichas;
