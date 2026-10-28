@@ -6,4 +6,6 @@ body { @apply bg-bg text-zinc-100 antialiased; font-family: Georgia, 'Times New 
 /* Animação suave de entrada dos cards */
 .fade { animation: fade .3s ease both; }
 @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .fade { animation: none; } }
+/* "Tema claro" simples: inverte as cores da página (imagens são re-invertidas) */
+html.light { filter: invert(1) hue-rotate(180deg); }
+html.light img { filter: invert(1) hue-rotate(180deg); }

@@ -1,16 +1,10 @@
-import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import AuthGate from './components/AuthGate'
-import { SheetProvider } from './store'
+import { CharacterProvider } from './context/CharacterContext'
 import './index.css'
 
+// AuthGate mostra o login; depois dele, o Provider carrega a ficha do Supabase
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <AuthGate>
-      <SheetProvider>
-        <App />
-      </SheetProvider>
-    </AuthGate>
-  </React.StrictMode>,
+  <AuthGate><CharacterProvider><App /></CharacterProvider></AuthGate>
 )
