@@ -27,7 +27,7 @@ export function search(s: Sheet, raw: string): Hit[] {
     const f = fields.find(x => norm(x).includes(q))
     if (f !== undefined || norm(title).includes(q)) hits.push({ key, tab, tabLabel, title: title || '(sem nome)', snippet: f !== undefined && norm(title).includes(q) === false ? snippet(f, q) : '', target })
   }
-  add('ficha', 'Ficha', 'info', s.name || 'Informações', [s.name, s.race, s.klass, s.level ? `Nível ${s.level}` : ''])
+  add('ficha', 'Ficha', 'info', s.name || 'Informações', [s.player, s.name, s.race, s.klass, s.level ? `Nível ${s.level}` : ''])
   s.elements.forEach(e => add('ficha', 'Elementos', e.id, e.name, [], `item-${e.id}`))
   s.customAttrs.forEach(a => add('ficha', 'Atributo', a.id, a.label, [], `item-${a.id}`))
   const lists: [keyof Pick<Sheet, 'equipment' | 'spells' | 'passives'>, string, string][] =

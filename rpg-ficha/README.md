@@ -8,6 +8,8 @@ Abas: **Ficha** (foto, informações, atributos, status e **exportar/importar**)
 
 **Adicionar elementos:** na aba Ficha, o card **Elementos** adiciona/remove elementos (Fogo, Luz...) e o botão **+ Atributo** cria atributos personalizados, além dos padrões. Fichas antigas continuam funcionando.
 
+**Nome do player:** no primeiro acesso o site pergunta o nome de quem joga (separado do nome do personagem), antes de mostrar a ficha. Depois de preenchido a pergunta não volta; dá para mudar na aba Ficha > Informações.
+
 ## Modo mestre
 
 Rode o bloco **MODO MESTRE** do `supabase.sql` (já deixa `ronandasilva0983@gmail.com` e `duda2007udi@gmail.com` como mestres; a conta precisa existir antes, então crie-a no site e rode o bloco depois, ou rode só o último `insert`). Quem é mestre vê, ao entrar, o **Painel do Mestre**:

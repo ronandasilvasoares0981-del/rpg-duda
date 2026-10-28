@@ -58,7 +58,7 @@ export function ListaPlayers({ myId, onBack, onOpen }: { myId: string; onBack: (
   const shown = useMemo(() => {
     const k = norm(q.trim())
     return (rows ?? []).map(r => ({ ...r, s: mergeSheet(r.data ?? {}) }))
-      .filter(r => !k || norm([r.s.name, r.s.race, r.s.klass, r.email ?? ''].join(' ')).includes(k))
+      .filter(r => !k || norm([r.s.player, r.s.name, r.s.race, r.s.klass, r.email ?? ''].join(' ')).includes(k))
   }, [rows, q])
 
   return (
@@ -73,7 +73,7 @@ export function ListaPlayers({ myId, onBack, onOpen }: { myId: string; onBack: (
           <h1 className="text-2xl font-bold text-amber-400 sm:text-3xl">👥 Fichas dos players</h1>
           <div className="relative w-full sm:w-72">
             <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
-            <input type="search" aria-label="Pesquisar players" placeholder="Pesquisar player…" value={q} onChange={e => setQ(e.target.value)}
+            <input type="search" aria-label="Pesquisar players" placeholder="Pesquisar por player, personagem…" value={q} onChange={e => setQ(e.target.value)}
               className="w-full rounded-full border border-purple-500/30 bg-zinc-900 py-2 pl-9 pr-3 text-base text-zinc-100 outline-none transition focus:border-amber-400 sm:text-sm" />
           </div>
         </div>
@@ -95,6 +95,7 @@ export function ListaPlayers({ myId, onBack, onOpen }: { myId: string; onBack: (
               <div className="min-w-0">
                 <p className="truncate text-lg font-bold text-amber-300">{s.name || 'Sem nome'}</p>
                 <p className="truncate text-sm text-zinc-300">{[s.level ? `Nível ${s.level}` : '', s.race, s.klass].filter(Boolean).join(' • ') || 'Ficha em branco'}</p>
+                <p className="truncate text-sm text-zinc-400">Player: {s.player || '—'}</p>
                 {email && <p className="truncate text-xs text-zinc-500">{email}</p>}
                 <p className="text-xs text-zinc-500">Atualizada em {new Date(updated_at).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</p>
               </div>

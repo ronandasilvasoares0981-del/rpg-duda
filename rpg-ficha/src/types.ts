@@ -9,6 +9,7 @@ export interface Vital { cur: number; max: number }
 
 export interface Sheet {
   image: string                        // foto do personagem (URL pública do Storage)
+  player: string                       // nome de quem joga (diferente do nome do personagem)
   name: string; race: string; klass: string; level: number // klass = classe (class é palavra reservada)
   attrs: Record<string, number>        // Força, Defesa...
   vitals: Record<string, Vital>        // hp, mp, stamina, energy
@@ -36,7 +37,7 @@ export const VITALS = [
 ] as const
 
 export const defaultSheet = (): Sheet => ({
-  image: '', name: '', race: '', klass: '', level: 0,
+  image: '', player: '', name: '', race: '', klass: '', level: 0,
   attrs: {}, vitals: {}, damage: 0, armor: 0, elements: [], customAttrs: [],
   equipment: [], spells: [], passives: [], allies: [], lore: '', chapters: [],
 })

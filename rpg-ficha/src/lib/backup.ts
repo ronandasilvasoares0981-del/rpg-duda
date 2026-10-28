@@ -23,7 +23,7 @@ export function normalizeSheet(raw: unknown): Sheet {
   const r = rec(raw)
   return {
     image: img(r.image),
-    name: str(r.name), race: str(r.race), klass: str(r.klass), level: num(r.level),
+    player: str(r.player), name: str(r.name), race: str(r.race), klass: str(r.klass), level: num(r.level),
     attrs: Object.fromEntries(Object.entries(rec(r.attrs)).map(([k, v]) => [k, num(v)])),
     vitals: Object.fromEntries(Object.entries(rec(r.vitals)).map(([k, v]) => [k, { cur: num(rec(v).cur), max: num(rec(v).max) }])),
     damage: num(r.damage), armor: num(r.armor),

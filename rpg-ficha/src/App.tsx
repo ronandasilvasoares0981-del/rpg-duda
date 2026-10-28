@@ -7,6 +7,7 @@ import EntryPage from './pages/EntryPage'
 import Aliados from './pages/Aliados'
 import Lore from './pages/Lore'
 import SearchBar, { Hit } from './components/SearchBar'
+import PlayerNameGate from './components/PlayerNameGate'
 
 // Para criar uma nova aba: crie a página em src/pages e adicione uma linha aqui
 const TABS = [
@@ -57,6 +58,9 @@ export default function App({ onBack, doPlayer }: { onBack?: () => void; doPlaye
       <p className="text-zinc-400">Confira se o arquivo <code>supabase.sql</code> foi executado no SQL Editor do Supabase.</p>
     </div>
   )
+
+  // Primeiro acesso: pede o nome do player antes de mostrar a ficha
+  if (!doPlayer && !sheet.player.trim()) return <PlayerNameGate />
 
   return (
     <div className="flex min-h-screen flex-col">

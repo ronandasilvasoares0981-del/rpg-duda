@@ -45,7 +45,7 @@ export default function Ficha() {
       <Card className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
         <PhotoBox src={s.image} onChange={u => set('image', u)} className="h-64 w-48 max-w-full" label="Foto do personagem" />
         <div className="w-full min-w-0 flex-1 space-y-2">
-          <p className="text-sm text-zinc-400">📖 Ficha de Personagem</p>
+          <p className="text-sm text-zinc-400">📖 Ficha de Personagem{s.player && <> • Player: <span className="text-zinc-200">{s.player}</span></>}</p>
           <h1 className="break-words text-3xl font-bold sm:text-4xl text-amber-400">{s.name || 'Sem nome'}</h1>
           <p className="text-zinc-300">{[s.level ? `Nível ${s.level}` : '', s.race, s.klass].filter(Boolean).join(' • ') || 'Preencha as informações abaixo'}</p>
           {VITALS.map(d => {
@@ -63,7 +63,8 @@ export default function Ficha() {
       <Card className="space-y-3">
         <h2 className="text-2xl font-bold text-amber-400">📋 Informações</h2>
         <div className="grid gap-3 sm:grid-cols-2">
-          <Txt label="Nome" value={s.name} onChange={v => set('name', v)} />
+          <Txt label="Nome do player (quem joga)" value={s.player} onChange={v => set('player', v)} />
+          <Txt label="Nome do personagem" value={s.name} onChange={v => set('name', v)} />
           <Txt label="Raça" value={s.race} onChange={v => set('race', v)} />
           <Txt label="Classe" value={s.klass} onChange={v => set('klass', v)} />
           <Field label="Nível"><Num value={s.level} onChange={n => set('level', n)} /></Field>

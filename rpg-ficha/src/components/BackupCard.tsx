@@ -31,7 +31,7 @@ export default function BackupCard() {
       const incoming = parseBackup(await file.text())
       if (!confirm(`Importar "${incoming.name || 'ficha sem nome'}"? A ficha atual será SUBSTITUÍDA. Se quiser guardá-la, exporte antes.`)) return
       const { sheet: ready, failed } = await uploadEmbeddedImages(incoming)
-      update(() => ready)
+      update(cur => ({ ...ready, player: ready.player || cur.player }))
       setMsg({ ok: true, text: failed ? `Ficha importada, mas ${failed} imagem(ns) não puderam ser enviadas.` : 'Ficha importada com sucesso.' })
     } catch (e) { setMsg({ ok: false, text: (e as Error).message || 'Não foi possível importar.' }) }
     finally { setBusy(false) }
