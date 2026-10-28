@@ -15,7 +15,12 @@ export default function Status() {
         </div>
         <div className="mt-3 flex gap-2">
           <input className={inputCls} placeholder="Novo atributo" value={novo} onChange={e => setNovo(e.target.value)} />
-          <button className={btnCls} onClick={() => { if (novo.trim()) { setStat(novo.trim(), 0); setNovo('') } }}>Adicionar</button>
+          <button className={btnCls} onClick={() => {
+            const nome = novo.trim()
+            if (!nome) return
+            if (nome in c.stats) return alert('Esse atributo já existe.') // senão o valor atual seria zerado
+            setStat(nome, 0); setNovo('')
+          }}>Adicionar</button>
         </div>
       </section>
       <section>

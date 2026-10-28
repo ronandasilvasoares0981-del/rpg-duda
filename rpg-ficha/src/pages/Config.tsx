@@ -1,6 +1,6 @@
 import { Download, LogOut, RotateCcw, Upload } from 'lucide-react'
 import { supabase } from '../lib/supabase'
-import { useCharacter } from '../context/CharacterContext'
+import { normalizeState, useCharacter } from '../context/CharacterContext'
 import { btnCls, Card } from '../components/ui'
 
 export default function Config() {
@@ -17,7 +17,10 @@ export default function Config() {
   const importar = (f?: File) => {
     if (!f) return
     const r = new FileReader()
-    r.onload = () => { try { replaceAll(JSON.parse(String(r.result))) } catch { alert('Arquivo inválido: use um JSON exportado por este app.') } }
+    r.onload = () => {
+      try { replaceAll({ ...normalizeState(JSON.parse(String(r.result))), dark: state.dark }) }
+      catch (e) { alert(e instanceof SyntaxError ? 'O arquivo não é um JSON válido.' : (e as Error).message) }
+    }
     r.readAsText(f)
   }
   return (
@@ -30,7 +33,7 @@ export default function Config() {
         <button className={btnCls} onClick={exportar}><Download size={16} /> Exportar ficha (JSON)</button>
         <label className={`${btnCls} cursor-pointer`}>
           <Upload size={16} /> Importar ficha
-          <input type="file" accept="application/json" className="hidden" onChange={e => importar(e.target.files?.[0])} />
+          <input type="file" accept="application/json" className="hidden" onChange={e => { importar(e.target.files?.[0]); e.target.value = '' }} />
         </label>
         <button className="inline-flex items-center gap-2 rounded-lg bg-red-800 px-4 py-2 hover:bg-red-700"
           onClick={() => confirm('Apagar todos os dados e voltar à ficha inicial?') && reset()}>

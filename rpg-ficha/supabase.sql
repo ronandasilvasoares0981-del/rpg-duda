@@ -31,6 +31,9 @@ create table if not exists public.characters (
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );
+-- Altura aceita valores maiores (numeric(4,2) dava erro se alguém digitasse 170 em vez de 1.70)
+alter table public.characters alter column height type numeric(6,2);
+
 -- Paleta de elementos do personagem (nome, ícone, cor) — editável no site,
 -- por isso fica num jsonb em vez de uma lista fixa no código
 alter table public.characters add column if not exists elements_meta jsonb not null default '[]'::jsonb;
@@ -231,3 +234,22 @@ begin
 end;
 $$;
 grant execute on function public.seed_character() to authenticated;
+
+-- ---------------------------------------------------------------------
+-- 6) FICHA EM JSON (usada por src/store.tsx: Aliados, Lore, Elementos, Backup)
+--    Uma linha por usuário; o conteúdo da ficha fica na coluna "data".
+-- ---------------------------------------------------------------------
+create table if not exists public.rpg_fichas (
+  user_id     uuid primary key default auth.uid() references auth.users(id) on delete cascade,
+  data        jsonb not null default '{}'::jsonb,
+  updated_at  timestamptz not null default now()
+);
+alter table public.rpg_fichas enable row level security;
+
+drop policy if exists "dono gerencia sua ficha json" on public.rpg_fichas;
+create policy "dono gerencia sua ficha json" on public.rpg_fichas
+  for all to authenticated
+  using (user_id = (select auth.uid()))
+  with check (user_id = (select auth.uid()));
+
+grant select, insert, update, delete on public.rpg_fichas to authenticated;

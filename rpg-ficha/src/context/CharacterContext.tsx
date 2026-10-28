@@ -2,9 +2,9 @@ import { createContext, ReactNode, useContext, useEffect, useRef, useState } fro
 import { supabase } from '../lib/supabase'
 import { Character } from '../types/character'
 import { DEFAULT_ELEMENTS, ElementDef } from '../types/elements'
-import { Magic } from '../types/magic'
-import { Passive } from '../types/passive'
-import { Accessory } from '../types/accessory'
+import { Magic, newMagic } from '../types/magic'
+import { Passive, newPassive } from '../types/passive'
+import { Accessory, newAccessory } from '../types/accessory'
 
 export interface AppState {
   dark: boolean; character: Character; magics: Magic[]; passives: Passive[]; accessories: Accessory[]
@@ -36,12 +36,20 @@ const clean = (r: any) => {
 // ---------- LER do Supabase ----------
 async function fetchAll(): Promise<{ cid: string; state: AppState }> {
   const first = () => supabase.from('characters').select('*').order('created_at').limit(1).maybeSingle()
-  let { data: row } = await first()
-  if (!row) { await supabase.rpc('seed_character'); row = (await first()).data } // primeiro acesso: cria uma ficha em branco
+  const r1 = await first()
+  if (r1.error) throw new Error(`Erro ao carregar a ficha: ${r1.error.message}. O supabase.sql já foi executado?`)
+  let row = r1.data
+  if (!row) { // primeiro acesso: cria uma ficha em branco
+    const seed = await supabase.rpc('seed_character')
+    if (seed.error) throw new Error(`Erro ao criar a ficha: ${seed.error.message}. Rode o supabase.sql de novo no Supabase.`)
+    row = (await first()).data
+  }
   if (!row) throw new Error('Não foi possível carregar a ficha. O supabase.sql já foi executado?')
 
   const q = (t: string, order: string) => supabase.from(t).select('*').eq('character_id', row.id).order(order)
   const [st, mg, ps, ac] = await Promise.all([q('stats', 'sort'), q('magics', 'created_at'), q('passives', 'created_at'), q('accessories', 'created_at')])
+  const bad = [st, mg, ps, ac].find(r => r.error)
+  if (bad?.error) throw new Error(`Erro ao carregar os dados: ${bad.error.message}`)
   const rec = (kind: string) => Object.fromEntries((st.data ?? []).filter((r: any) => r.kind === kind).map((r: any) => [r.name, r.value]))
   const txt = (v: unknown) => (v == null ? '' : String(v))
 
@@ -64,23 +72,42 @@ async function fetchAll(): Promise<{ cid: string; state: AppState }> {
 }
 
 // ---------- GRAVAR no Supabase ----------
-async function push(cid: string, s: AppState) {
+// Texto entre aspas para usar dentro de um filtro "in (...)" do Supabase
+const quote = (v: string) => `"${v.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`
+const int = (n: number) => Math.round(Number(n) || 0)                          // colunas int não aceitam decimais
+const dec = (v: string) => Number(String(v).replace(',', '.')) || null          // aceita "1,70" e "1.70"
+
+// Devolve '' se tudo foi salvo, ou a mensagem de erro
+async function push(cid: string, s: AppState): Promise<string> {
   const c = s.character
-  const chk = (label: string, r: { error: { message: string } | null }) => { if (r.error) console.error(label, r.error.message) }
+  const errs: string[] = []
+  const chk = (label: string, r: { error: { message: string } | null }) => {
+    if (r.error) { console.error(label, r.error.message); errs.push(`${label}: ${r.error.message}`) }
+  }
 
   chk('ficha', await supabase.from('characters').update({
-    name: c.name, player: c.player, race: c.race, klass: c.klass, level: c.level, age: c.age,
-    height: Number(c.height) || null, weight: Number(c.weight) || null, elements: c.elements,
-    hp: c.hp, hp_max: c.hpMax, san: c.san, san_max: c.sanMax, image_url: c.image || null,
+    name: c.name, player: c.player, race: c.race, klass: c.klass, level: int(c.level), age: int(c.age),
+    height: dec(c.height), weight: dec(c.weight), elements: c.elements,
+    hp: int(c.hp), hp_max: int(c.hpMax), san: int(c.san), san_max: int(c.sanMax), image_url: c.image || null,
     elements_meta: s.elementDefs,
   }).eq('id', cid))
 
-  // Status: apaga e regrava (a coluna "sort" guarda a ordem)
-  await supabase.from('stats').delete().eq('character_id', cid)
-  chk('status', await supabase.from('stats').insert([
-    ...Object.entries(c.stats).map(([name, value]) => ({ character_id: cid, kind: 'atributo', name, value })),
-    ...Object.entries(c.resources).map(([name, value]) => ({ character_id: cid, kind: 'recurso', name, value })),
-  ]))
+  // Status: grava/atualiza cada item e só apaga o que foi removido
+  // (antes apagava tudo e regravava — se a gravação falhasse no meio, os status se perdiam)
+  const rows = [
+    ...Object.entries(c.stats).map(([name, value]) => ({ character_id: cid, kind: 'atributo', name, value: int(value) })),
+    ...Object.entries(c.resources).map(([name, value]) => ({ character_id: cid, kind: 'recurso', name, value: int(value) })),
+  ]
+  const up = await supabase.from('stats').upsert(rows, { onConflict: 'character_id,kind,name' })
+  chk('status', up)
+  if (!up.error) {
+    for (const [kind, rec] of [['atributo', c.stats], ['recurso', c.resources]] as const) {
+      const names = Object.keys(rec)
+      let del = supabase.from('stats').delete().eq('character_id', cid).eq('kind', kind)
+      if (names.length) del = del.not('name', 'in', `(${names.map(quote).join(',')})`)
+      chk('status', await del)
+    }
+  }
 
   // Listas: grava/atualiza os itens e apaga os que foram removidos no app
   for (const key of ['magics', 'passives', 'accessories'] as ListKey[]) {
@@ -90,10 +117,51 @@ async function push(cid: string, s: AppState) {
       const { image, ...rest } = i as Accessory
       return { ...rest, image_url: image || null, character_id: cid }
     })
-    if (rows.length) chk(key, await supabase.from(key).upsert(rows))
+    if (rows.length) {
+      const r = await supabase.from(key).upsert(rows)
+      chk(key, r)
+      if (r.error) continue // não apaga nada se a gravação falhou
+    }
     let del = supabase.from(key).delete().eq('character_id', cid)
     if (items.length) del = del.not('id', 'in', `(${items.map(i => i.id).join(',')})`)
     chk(key, await del)
+  }
+  return errs.join(' | ')
+}
+
+// ---------- IMPORTAR (valida um JSON vindo de fora) ----------
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const isObj = (v: unknown): v is Record<string, any> => typeof v === 'object' && v !== null && !Array.isArray(v)
+
+// Mantém só os campos esperados, com o tipo certo; o que faltar ou vier errado usa o valor padrão
+const coerce = <T extends object>(blank: T, raw: unknown): T => {
+  const src: Record<string, any> = isObj(raw) ? raw : {}
+  return Object.fromEntries(Object.entries(blank).map(([k, d]) => {
+    const v = src[k]
+    if (Array.isArray(d)) return [k, Array.isArray(v) ? v.filter(x => typeof x === 'string') : d]
+    return [k, typeof v === typeof d && v !== null ? v : d]
+  })) as T
+}
+const numRec = (v: unknown, d: Record<string, number>) =>
+  isObj(v) ? (Object.fromEntries(Object.entries(v).filter(([, n]) => typeof n === 'number' && Number.isFinite(n))) as Record<string, number>) : d
+// Ids precisam ser UUID (o banco recusa outros formatos): gera um novo se vier inválido
+const list = <T extends { id: string }>(blank: () => T, raw: unknown): T[] =>
+  Array.isArray(raw) ? raw.map(x => { const o = coerce(blank(), x); return { ...o, id: UUID.test(o.id) ? o.id : crypto.randomUUID() } }) : []
+
+// Transforma um JSON qualquer em um AppState seguro (lança erro em português se não for uma ficha)
+export function normalizeState(raw: unknown): AppState {
+  if (!isObj(raw) || !isObj(raw.character)) throw new Error('Arquivo inválido: use um JSON exportado por este app.')
+  const character = coerce(INITIAL.character, raw.character)
+  character.stats = numRec(raw.character.stats, INITIAL.character.stats)
+  character.resources = numRec(raw.character.resources, INITIAL.character.resources)
+  const defs: ElementDef[] = Array.isArray(raw.elementDefs)
+    ? raw.elementDefs.filter(d => isObj(d) && typeof d.name === 'string' && d.name && typeof d.icon === 'string' && typeof d.cls === 'string')
+        .map(d => ({ name: d.name, icon: d.icon, cls: d.cls }))
+    : []
+  return {
+    dark: INITIAL.dark, character,
+    magics: list(newMagic, raw.magics), passives: list(newPassive, raw.passives), accessories: list(newAccessory, raw.accessories),
+    elementDefs: defs.length ? defs : DEFAULT_ELEMENTS,
   }
 }
 
@@ -119,6 +187,16 @@ export function CharacterProvider({ children }: { children: ReactNode }) {
   const cid = useRef('')                                   // id da ficha no banco
   const dirty = useRef(false)                              // true = há mudança do usuário para enviar
   const queue = useRef<Promise<void>>(Promise.resolve())   // envia uma gravação por vez
+  const version = useRef(0)                                 // conta as alterações do usuário
+  const pending = useRef(false)                             // true = há alteração ainda não gravada
+  const [saveErr, setSaveErr] = useState('')                // erro da última gravação (aparece na tela)
+
+  // Avisa antes de fechar a aba se ainda há algo sem salvar
+  useEffect(() => {
+    const h = (e: BeforeUnloadEvent) => { if (pending.current) { e.preventDefault(); e.returnValue = '' } }
+    window.addEventListener('beforeunload', h)
+    return () => window.removeEventListener('beforeunload', h)
+  }, [])
 
   // Ao abrir: carrega do Supabase
   useEffect(() => {
@@ -128,7 +206,15 @@ export function CharacterProvider({ children }: { children: ReactNode }) {
   // Depois de cada mudança do usuário, grava no banco (com espera de 0,8 s para agrupar digitação)
   useEffect(() => {
     if (!state || !dirty.current) return
-    const t = setTimeout(() => { queue.current = queue.current.then(() => push(cid.current, state)) }, 800)
+    const v = version.current
+    const t = setTimeout(() => {
+      queue.current = queue.current.then(async () => {
+        let msg = ''
+        try { msg = await push(cid.current, state) } catch (e) { msg = (e as Error).message || 'sem conexão' }
+        setSaveErr(msg)
+        if (!msg && version.current === v) pending.current = false
+      })
+    }, 800)
     return () => clearTimeout(t)
   }, [state])
 
@@ -138,7 +224,7 @@ export function CharacterProvider({ children }: { children: ReactNode }) {
   if (!state) return <p className="p-8 text-zinc-400">Carregando ficha…</p>
 
   // set: toda alteração do usuário passa por aqui (marca "dirty" para disparar a gravação)
-  const set = (fn: (s: AppState) => AppState) => { dirty.current = true; setState(s => (s ? fn(s) : s)) }
+  const set = (fn: (s: AppState) => AppState) => { dirty.current = true; pending.current = true; version.current++; setState(s => (s ? fn(s) : s)) }
   const char = (fn: (c: Character) => Character) => set(s => ({ ...s, character: fn(s.character) }))
 
   const value: Ctx = {
@@ -162,5 +248,14 @@ export function CharacterProvider({ children }: { children: ReactNode }) {
     replaceAll: s => set(() => ({ ...INITIAL, ...s })),
     reset: () => set(() => INITIAL),
   }
-  return <Context.Provider value={value}>{children}</Context.Provider>
+  return (
+    <Context.Provider value={value}>
+      {children}
+      {saveErr && (
+        <div role="alert" className="fixed bottom-4 right-4 z-[60] max-w-sm rounded-xl border border-red-500/50 bg-zinc-900 p-3 text-sm text-red-300">
+          ⚠️ Não foi possível salvar: {saveErr}
+        </div>
+      )}
+    </Context.Provider>
+  )
 }
