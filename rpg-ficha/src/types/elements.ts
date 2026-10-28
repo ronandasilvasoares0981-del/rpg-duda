@@ -19,7 +19,7 @@ export const COLOR_PRESETS: { label: string; cls: string }[] = [
   { label: 'Azul', cls: 'border-blue-400 text-blue-300' },
 ]
 
-// Elementos iniciais da Elisa (mesmos de antes)
+// Elementos disponíveis por padrão (o personagem começa sem nenhum marcado)
 export const DEFAULT_ELEMENTS: ElementDef[] = [
   { name: 'Fogo', icon: '🔥', cls: COLOR_PRESETS[0].cls },
   { name: 'Luz', icon: '✨', cls: COLOR_PRESETS[1].cls },

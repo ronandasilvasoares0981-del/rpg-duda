@@ -196,31 +196,33 @@ create policy "apaga na propria pasta" on storage.objects
          and (storage.foldername(name))[1] = (select auth.uid())::text);
 
 -- ---------------------------------------------------------------------
--- 5) FICHA INICIAL (Elisa) — chame pelo app depois do login:
---      supabase.rpc('seed_elisa')
+-- 5) FICHA INICIAL EM BRANCO — chamada pelo app depois do primeiro login:
+--      supabase.rpc('seed_character')
 --    Não rode pelo SQL Editor: lá não existe usuário logado (auth.uid() é nulo).
 -- ---------------------------------------------------------------------
-create or replace function public.seed_elisa()
+-- Remove a função antiga que criava a ficha pronta da Elisa
+drop function if exists public.seed_elisa();
+
+create or replace function public.seed_character()
 returns uuid
 language plpgsql
 as $$
 declare
   cid uuid;
 begin
-  insert into public.characters
-    (name, player, race, klass, level, age, height, weight, elements, hp, hp_max, san, san_max)
-  values
-    ('Elisa', 'Ronan', 'Nokturno', 'Ilusionista Materializadora / Bardo', 12, 1309, 1.70, 66,
-     array['Fogo', 'Luz', 'Escuridão', 'Sangue', 'Selo'], 403, 403, 100, 100)
+  -- Personagem em branco: o usuário preenche tudo na aba Ficha
+  insert into public.characters (name, level)
+  values ('Novo Personagem', 1)
   returning id into cid;
 
+  -- Nomes dos atributos/recursos já aparecem na aba Status, todos com valor 0
   insert into public.stats (character_id, kind, name, value) values
-    (cid, 'atributo', 'Força',          339),
-    (cid, 'atributo', 'Velocidade',     363),
-    (cid, 'atributo', 'Defesa',         402),
-    (cid, 'atributo', 'Inteligência',   202),
-    (cid, 'atributo', 'Sabedoria',      156),
-    (cid, 'atributo', 'Carisma',        104),
+    (cid, 'atributo', 'Força',          0),
+    (cid, 'atributo', 'Velocidade',     0),
+    (cid, 'atributo', 'Defesa',         0),
+    (cid, 'atributo', 'Inteligência',   0),
+    (cid, 'atributo', 'Sabedoria',      0),
+    (cid, 'atributo', 'Carisma',        0),
     (cid, 'recurso',  'Pontos de Ação', 0),
     (cid, 'recurso',  'Mana',           0),
     (cid, 'recurso',  'Energia',        0);
@@ -228,4 +230,4 @@ begin
   return cid;
 end;
 $$;
-grant execute on function public.seed_elisa() to authenticated;
+grant execute on function public.seed_character() to authenticated;

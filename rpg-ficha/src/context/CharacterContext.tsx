@@ -13,15 +13,15 @@ export interface AppState {
 export type ListKey = 'magics' | 'passives' | 'accessories'
 type Item = Magic | Passive | Accessory
 
-// Ficha inicial (usada no "Resetar dados")
+// Ficha em branco (usada no "Resetar dados")
 export const INITIAL: AppState = {
   dark: true,
   character: {
-    name: 'Elisa', player: 'Ronan', race: 'Nokturno', klass: 'Ilusionista Materializadora / Bardo',
-    level: 12, age: 1309, height: '1.70', weight: '66',
-    elements: ['Fogo', 'Luz', 'Escuridão', 'Sangue', 'Selo'],
-    hp: 403, hpMax: 403, san: 100, sanMax: 100, image: '',
-    stats: { Força: 339, Velocidade: 363, Defesa: 402, Inteligência: 202, Sabedoria: 156, Carisma: 104 },
+    name: 'Novo Personagem', player: '', race: '', klass: '',
+    level: 1, age: 0, height: '', weight: '',
+    elements: [],
+    hp: 0, hpMax: 0, san: 0, sanMax: 0, image: '',
+    stats: { Força: 0, Velocidade: 0, Defesa: 0, Inteligência: 0, Sabedoria: 0, Carisma: 0 },
     resources: { 'Pontos de Ação': 0, Mana: 0, Energia: 0 },
   },
   magics: [], passives: [], accessories: [], elementDefs: DEFAULT_ELEMENTS,
@@ -37,7 +37,7 @@ const clean = (r: any) => {
 async function fetchAll(): Promise<{ cid: string; state: AppState }> {
   const first = () => supabase.from('characters').select('*').order('created_at').limit(1).maybeSingle()
   let { data: row } = await first()
-  if (!row) { await supabase.rpc('seed_elisa'); row = (await first()).data } // primeiro acesso: cria a Elisa
+  if (!row) { await supabase.rpc('seed_character'); row = (await first()).data } // primeiro acesso: cria uma ficha em branco
   if (!row) throw new Error('Não foi possível carregar a ficha. O supabase.sql já foi executado?')
 
   const q = (t: string, order: string) => supabase.from(t).select('*').eq('character_id', row.id).order(order)
